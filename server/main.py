@@ -116,6 +116,15 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 HISTORY_DB_PATH = os.environ.get("HISTORY_DB_PATH", "/app/history/history.db")
 DEFAULT_LLM_MODEL = os.environ.get("MEM0_DEFAULT_LLM_MODEL", "gpt-5-mini")
 DEFAULT_EMBEDDER_MODEL = os.environ.get("MEM0_DEFAULT_EMBEDDER_MODEL", "text-embedding-3-small")
+DEFAULT_EMBEDDING_DIMS_VALUE = os.environ.get("MEM0_DEFAULT_EMBEDDING_DIMS")
+DEFAULT_EMBEDDING_DIMS = int(DEFAULT_EMBEDDING_DIMS_VALUE) if DEFAULT_EMBEDDING_DIMS_VALUE else None
+
+if DEFAULT_EMBEDDING_DIMS is not None and DEFAULT_EMBEDDING_DIMS <= 0:
+    raise RuntimeError("MEM0_DEFAULT_EMBEDDING_DIMS must be a positive integer.")
+
+DEFAULT_EMBEDDER_CONFIG = {"api_key": OPENAI_API_KEY, "model": DEFAULT_EMBEDDER_MODEL}
+if DEFAULT_EMBEDDING_DIMS is not None:
+    DEFAULT_EMBEDDER_CONFIG["embedding_dims"] = DEFAULT_EMBEDDING_DIMS
 
 DEFAULT_CONFIG = {
     "version": "v1.1",
@@ -128,13 +137,14 @@ DEFAULT_CONFIG = {
             "user": POSTGRES_USER,
             "password": POSTGRES_PASSWORD,
             "collection_name": POSTGRES_COLLECTION_NAME,
+            "embedding_model_dims": DEFAULT_EMBEDDING_DIMS or 1536,
         },
     },
     "llm": {
         "provider": "openai",
         "config": {"api_key": OPENAI_API_KEY, "temperature": 0.2, "model": DEFAULT_LLM_MODEL},
     },
-    "embedder": {"provider": "openai", "config": {"api_key": OPENAI_API_KEY, "model": DEFAULT_EMBEDDER_MODEL}},
+    "embedder": {"provider": "openai", "config": DEFAULT_EMBEDDER_CONFIG},
     "history_db_path": HISTORY_DB_PATH,
 }
 

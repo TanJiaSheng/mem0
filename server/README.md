@@ -212,6 +212,20 @@ POSTGRES_COLLECTION_NAME=memories
 If you previously relied on the hardcoded defaults (`postgres`/`postgres`), set
 `POSTGRES_PASSWORD=postgres` to keep the same credentials.
 
+When using an OpenAI-compatible embedding model whose output is not 1536
+dimensions, set `MEM0_DEFAULT_EMBEDDING_DIMS` to the model's actual output
+size. The server applies the value to both the embedder request and the
+pgvector collection:
+
+```bash
+MEM0_DEFAULT_EMBEDDER_MODEL=text-embedding-v4
+MEM0_DEFAULT_EMBEDDING_DIMS=1024
+```
+
+Changing this value requires recreating or migrating an existing vector
+collection; pgvector cannot insert vectors with a different dimension into the
+same collection.
+
 **4. Start only Postgres**
 
 Start **only** the Postgres container first — do not start the mem0 API yet.
